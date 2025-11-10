@@ -28,6 +28,15 @@ class Sphere(Function):
         """
         return np.sum(x**2, axis=-1)
 
+    def gradient(self, x: np.ndarray) -> np.ndarray:
+        """Compute the gradient of the Sphere function at a given point.
+        Args:
+            x (np.ndarray): Input array of shape (..., n), where n is the number of dimensions.
+        Returns:
+            np.ndarray: Gradient vector(s) at the input point(s).
+        """
+        return 2 * x
+
 
 if __name__ == "__main__":
     f = Sphere()

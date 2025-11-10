@@ -24,6 +24,9 @@ class Function:
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         raise NotImplementedError("Subclasses must implement this method")
+    
+    def gradient(self, x: np.ndarray) -> np.ndarray:
+        raise UndefinedValue("Gradient is not defined for this function.")
 
 
 class UndefinedValue(Exception):
