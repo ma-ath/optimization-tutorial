@@ -9,6 +9,7 @@ class Ackley(Function):
 
     Global minimum at x_{min} = [0, 0, ..., 0], f(x_{min}) = 0.
     """
+
     @property
     def global_minimum(self) -> np.ndarray:
         return np.array([0.0, 0.0])

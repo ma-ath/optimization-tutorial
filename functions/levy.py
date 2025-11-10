@@ -8,6 +8,7 @@ class Levy(Function):
 
     Global minimum at x_{min} = [1, 1, ..., 1], f(x_{min}) = 0.
     """
+
     @property
     def global_minimum(self) -> np.ndarray:
         return np.array([1.0, 1.0])

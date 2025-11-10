@@ -6,6 +6,7 @@ from schwefel import Schwefel
 from griewank import Griewank
 from levy import Levy
 
+
 __all__ = [
     "Ackley",
     "Rastrigin",
