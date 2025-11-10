@@ -1,11 +1,12 @@
 import numpy as np
+import logging
 from typing import TypedDict, Optional
 
 from functions._function import Function
 
 
 class Result(TypedDict):
-    x_min: np.ndarray
+    x_opt: np.ndarray
 
 
 class Algorithm:
@@ -14,6 +15,9 @@ class Algorithm:
     @property
     def name(self) -> str:
         return self.__class__.__name__
+
+    def __init__(self):
+        self._logger = logging.getLogger(__name__)
 
     def optimize(self,
                  function: Function, *,
