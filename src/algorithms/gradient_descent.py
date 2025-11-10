@@ -38,6 +38,7 @@ class GradientDescent(Algorithm):
             raise AssertionError("Either budget or stop_fitness must be provided!")
 
         x = initial_guess
+        x_history = [x.copy()]
 
         pbar = tqdm(total=budget, desc="Gradient Descent Optimization")
         while True:
@@ -49,6 +50,7 @@ class GradientDescent(Algorithm):
 
             # Count the number of function evaluations
             self._n_func_calls += 1
+            x_history.append(x.copy())
 
             fitness = function(x)
             pbar.update(1)
@@ -63,6 +65,7 @@ class GradientDescent(Algorithm):
         pbar.close()
         return {
             "x_opt": x,
+            "x_history": x_history
         }
 
 
@@ -76,10 +79,12 @@ if __name__ == "__main__":
 
     result = gd.optimize(
         function=func,
-        initial_guess=np.array([10.0]),
+        initial_guess=np.array([10.0, 10.0, 10.0]),
         budget=100,
+        stop_fitness=1e-6,
         minimize=True
     )
 
     print("Optimized x:", result["x_opt"])
     print("Function value at optimized x:", func(result["x_opt"]))
+    print("Optimization history:", result["x_history"])

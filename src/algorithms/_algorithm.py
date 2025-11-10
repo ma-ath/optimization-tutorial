@@ -1,12 +1,13 @@
 import numpy as np
 import logging
-from typing import TypedDict, Optional
+from typing import TypedDict, NotRequired, Optional
 
 from functions._function import Function
 
 
 class Result(TypedDict):
     x_opt: np.ndarray
+    x_history: NotRequired[list[np.ndarray]]
 
 
 class Algorithm:
