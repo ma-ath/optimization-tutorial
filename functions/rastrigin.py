@@ -8,6 +8,22 @@ class Rastrigin(Function):
 
     Global minimum at x_{min} = [0, 0, ..., 0], f(x_{min}) = 0.
     """
+
+    @property
+    def global_minimum(self) -> np.ndarray:
+        return np.array([0.0, 0.0])
+    
+    @property
+    def global_maximum(self) -> np.ndarray:
+        return np.array([[4.52299366, 4.52299366],
+                         [-4.52299366, -4.52299366],
+                         [4.52299366, -4.52299366],
+                         [-4.52299366, 4.52299366]])
+    
+    @property
+    def search_domain(self) -> tuple[float, float]:
+        return (-5.12, 5.12)
+
     def __init__(self, A: float = 10.0):
         self._A = A
         super().__init__()
@@ -26,10 +42,15 @@ class Rastrigin(Function):
 
 if __name__ == "__main__":
     f = Rastrigin()
-    x = np.array([[1.0, 1.0, 1.0], 
-                  [0.0, 0.0, 0.0],
-                  [-1.0, 1.0, 1.0]])
+    x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 3))
     y = f(x)
-    print(f"Rastrigin function value at {x}: {y}")
     for i in range(x.shape[0]):
         assert y[i] == f(x[i])
+        print(f"Rastrigin function value at {x[i]}: {y[i]}")
+
+    print(f"Rastrigin function value at global minimum {f.global_minimum}: {f(f.global_minimum)}")
+    assert np.isclose(f(f.global_minimum), 0.0)
+
+    for gm in f.global_maximum:
+        print(f"Rastrigin function value at global maximum {gm}: {f(gm)}")
+        assert np.isclose(f(gm), 80.70658039)
