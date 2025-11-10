@@ -25,6 +25,10 @@ class Function:
     @property
     def is_differentiable(self) -> bool:
         return False
+    
+    @property
+    def is_convex(self) -> bool:
+        return False
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         raise NotImplementedError("Subclasses must implement this method")

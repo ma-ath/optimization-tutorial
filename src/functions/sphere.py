@@ -24,6 +24,10 @@ class Sphere(Function):
     def is_differentiable(self) -> bool:
         return True
 
+    @property
+    def is_convex(self) -> bool:
+        return True
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the Sphere function at a given point.
         Args:
