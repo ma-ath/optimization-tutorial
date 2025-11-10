@@ -34,8 +34,8 @@ if __name__ == "__main__":
     x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 3))
     y = f(x)
     for i in range(x.shape[0]):
-        assert y[i] == f(x[i])
         print(f"Rosenbrock function value at {x[i]}: {y[i]}")
+        assert y[i] == f(x[i])
 
-    assert np.isclose(f(f.global_minimum), 0.0)
     print(f"Rosenbrock function value at global minimum {f.global_minimum}: {f(f.global_minimum)}")
+    assert np.isclose(f(f.global_minimum), 0.0)
