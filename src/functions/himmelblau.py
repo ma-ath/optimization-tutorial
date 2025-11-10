@@ -68,14 +68,24 @@ class Himmelblau(Function):
 if __name__ == "__main__":
     f = Himmelblau()
     x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 2))
+    x_grad = f.gradient(x)
     y = f(x)
     for i in range(x.shape[0]):
         print(f"Himmelblau function value at {x[i]}: {y[i]}")
         assert y[i] == f(x[i])
+        assert (x_grad[i] == f.gradient(x[i])).all()
 
     for gm in f.global_minimum:
         print(f"Himmelblau function value at global minimum {gm}: {f(gm)}")
         assert np.isclose(f(gm), 0.0)
 
+        x_grad = f.gradient(gm)
+        print(f"Gradient at global minimum {gm}:{x_grad}")
+        assert np.allclose(x_grad, 0.0, atol=1e-4)
+
     print(f"Himmelblau function value at global maximum {f.global_maximum}: {f(f.global_maximum)}")
     assert np.isclose(f(f.global_maximum), 181.617)
+
+    x_grad = f.gradient(f.global_maximum)
+    print(f"Gradient at global maximum {f.global_maximum}:{x_grad}")
+    assert np.allclose(x_grad, 0.0, atol=1e-4)

@@ -5,6 +5,7 @@ from sphere import Sphere
 from schwefel import Schwefel
 from griewank import Griewank
 from levy import Levy
+from himmelblau import Himmelblau
 
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "Schwefel",
     "Griewank",
     "Levy",
+    "Himmelblau",
 ]
