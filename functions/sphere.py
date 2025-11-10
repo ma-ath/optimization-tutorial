@@ -19,6 +19,10 @@ class Sphere(Function):
     def search_domain(self) -> tuple[float, float]:
         return (-100.0, 100.0)
 
+    @property
+    def is_differentiable(self) -> bool:
+        return True
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the Sphere function at a given point.
         Args:

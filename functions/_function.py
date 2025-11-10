@@ -22,6 +22,10 @@ class Function:
     def global_minimum(self) -> np.ndarray:
         raise UndefinedValue("This function does not have a global minimum defined.")
 
+    @property
+    def is_differentiable(self) -> bool:
+        return False
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
         raise NotImplementedError("Subclasses must implement this method")
     

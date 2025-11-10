@@ -25,8 +25,8 @@ class Rastrigin(Function):
         return (-5.12, 5.12)
 
     def __init__(self, A: float = 10.0):
-        self._A = A
         super().__init__()
+        self._A = A
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the Rastrigin function at a given point.

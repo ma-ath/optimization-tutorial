@@ -1,5 +1,5 @@
 import numpy as np
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 from functions._function import Function
 
@@ -16,13 +16,18 @@ class Algorithm:
         return self.__class__.__name__
 
     def optimize(self,
-                 function: Function,
-                 budget: int,
+                 function: Function, *,
+                 budget: Optional[int] = None,
+                 stop_fitness: Optional[float] = None,
                  minimize: bool = True) -> Result:
         """Optimize a given function within a specified budget.
         
         Args:
             function (Function): The objective function to optimize.
+            budget (Optional[int]): The maximum number of function evaluations.
+                if None, there is no limit on evaluations.
+            stop_fitness (Optional[float]): The target fitness value to reach.
+                if not None, the optimization will halt when this fitness is achieved.
             minimize (bool): Whether to minimize or maximize the function.
 
         Returns:

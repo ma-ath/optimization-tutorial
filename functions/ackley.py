@@ -19,10 +19,10 @@ class Ackley(Function):
         return (-32.768, 32.768)
 
     def __init__(self, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
+        super().__init__()
         self._a = a
         self._b = b
         self._c = c
-        super().__init__()
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the Ackley function at a given point.
