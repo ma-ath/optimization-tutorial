@@ -19,7 +19,8 @@ class GradientDescent(Algorithm):
                  initial_guess: np.ndarray,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
-                 minimize: bool = True) -> Result:
+                 minimize: bool = True,
+                 verbose: bool = False) -> Result:
         """Optimize a given function using Gradient Descent within a specified budget.
         
         Args:
@@ -37,16 +38,21 @@ class GradientDescent(Algorithm):
             self._logger.error("Either budget or stop_fitness must be provided!")
             raise AssertionError("Either budget or stop_fitness must be provided!")
 
+        assert function.is_differentiable, "Function must be differentiable for Gradient Descent."
+
         x = initial_guess
         x_history = [x.copy()]
 
-        pbar = tqdm(total=budget, desc="Gradient Descent Optimization")
+        pbar = tqdm(total=budget, desc="Gradient Descent Optimization", disable=not verbose)
         while True:
             # Update position
             if minimize:
                 x = x - self._lr * function.gradient(x)
             else:
                 x = x + self._lr * function.gradient(x)
+
+            # Ensure x is within search domain
+            x = np.clip(x, function.search_domain[0], function.search_domain[1])
 
             # Count the number of function evaluations
             self._n_func_calls += 1
@@ -70,8 +76,6 @@ class GradientDescent(Algorithm):
 
 
 if __name__ == "__main__":
-    # Use package-relative import so this module can be executed as
-    # `python -m src.algorithms.gradient_descent` or run from the package.
     from functions import Sphere
 
     func = Sphere()
