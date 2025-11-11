@@ -47,6 +47,7 @@ class DifferentialEvolution(Algorithm):
         # Optimization loop
         pbar = tqdm(total=budget, desc="DE Progress", disable=not verbose)
         while self._n_func_calls < budget:
+            raise NotImplementedError("Differential Evolution optimization not yet implemented.")
             # Pick three *distinct* indices not equal itself.
             idxs = np.arange(population_size).reshape(-1, 1).repeat(population_size, axis=1)
             mask = np.eye(population_size, dtype=bool)
