@@ -34,6 +34,8 @@ class GradientDescent(Algorithm):
             Result: The optimization result containing the estimated minimum point.
         """
 
+        self._n_func_calls = 0
+
         if budget is None and stop_fitness is None:
             self._logger.error("Either budget or stop_fitness must be provided!")
             raise AssertionError("Either budget or stop_fitness must be provided!")

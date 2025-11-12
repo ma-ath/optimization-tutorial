@@ -30,6 +30,8 @@ class DifferentialEvolution(Algorithm):
         assert not (budget is None and stop_fitness is None), \
             "Either budget or stop_fitness must be provided!"
 
+        self._n_func_calls = 0
+
         search_lower_bound, search_upper_bound = function.search_domain
 
         # Randomly initialize population

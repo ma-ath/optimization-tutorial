@@ -188,7 +188,7 @@ def animate_population_on_surface(function: Function, population_history: np.nda
         ys = np.asarray(population_history[frame, :, 1]).ravel()
         zs = np.asarray(Z_population[frame, :]).ravel()
         scatter._offsets3d = (xs, ys, zs)
-        ax.set_title(f"{title or getattr(function, 'name', 'Population on Surface')} — Frame {frame+1}/{n_frames}")
+        ax.set_title(f"{title or getattr(function, 'name', 'Population on Surface')}")
         return scatter,
 
     anim = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
