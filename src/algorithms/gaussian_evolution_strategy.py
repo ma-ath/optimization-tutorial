@@ -13,6 +13,11 @@ class GaussianEvolutionStrategy(Algorithm):
         https://blog.otoro.net/2017/10/29/visual-evolution-strategies/
         https://pymoo.org/algorithms/soo/es.html
     """
+
+    @property
+    def name(self) -> str:
+        return "Evolution Strategy with Gaussian Sampling"
+
     def __init__(self, *,
                  mean0: np.ndarray = 0.0,
                  sigma0: np.ndarray = 1.0):

@@ -8,6 +8,11 @@ from src.algorithms._algorithm import Algorithm, Result
 
 class DifferentialEvolution(Algorithm):
     """Differential Evolution optimization algorithm."""
+
+    @property
+    def name(self) -> str:
+        return "Differential Evolution (DE)"
+
     def __init__(self, *,
                  F: float = 0.5,
                  CR: float = 0.7):

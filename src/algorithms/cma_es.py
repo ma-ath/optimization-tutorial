@@ -16,6 +16,11 @@ class CMAES(Algorithm):
         https://github.com/CyberAgentAILab/cmaes
         https://arxiv.org/abs/2402.01373
     """
+
+    @property
+    def name(self) -> str:
+        return "Covariance Matrix Adaptation - Evolution Strategy (CMA-ES)"
+
     def __init__(self, *,
                  mean0: np.ndarray | float = 0.0,
                  sigma0: np.ndarray | float = 1.0):

@@ -9,6 +9,10 @@ from src.algorithms._algorithm import Algorithm, Result
 class GradientDescent(Algorithm):
     """Gradient Descent optimization algorithm."""
 
+    @property
+    def name(self) -> str:
+        return "Gradient Descent"
+
     def __init__(self, learning_rate: float = 0.01):
         super().__init__()
         self._lr: float = learning_rate
