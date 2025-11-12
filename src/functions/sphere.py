@@ -17,7 +17,7 @@ class Sphere(Function):
         return np.array([0.0, 0.0])
     
     @property
-    def search_domain(self) -> tuple[float, float]:
+    def function_domain(self) -> tuple[float, float]:
         return (-100.0, 100.0)
 
     @property
@@ -49,7 +49,7 @@ class Sphere(Function):
 
 if __name__ == "__main__":
     f = Sphere()
-    x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 3))
+    x = np.random.uniform(f.function_domain[0], f.function_domain[1], (5, 3))
     y = f(x)
     for i in range(x.shape[0]):
         print(f"Sphere function value at {x[i]}: {y[i]}")

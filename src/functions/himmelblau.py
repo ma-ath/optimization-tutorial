@@ -42,7 +42,7 @@ class Himmelblau(Function):
                          [3.584428, -1.848126]])
     
     @property
-    def search_domain(self) -> tuple[float, float]:
+    def function_domain(self) -> tuple[float, float]:
         return (-6.0, 6.0)
 
     @property
@@ -85,7 +85,7 @@ class Himmelblau(Function):
 
 if __name__ == "__main__":
     f = Himmelblau()
-    x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 2))
+    x = np.random.uniform(f.function_domain[0], f.function_domain[1], (5, 2))
     x_grad = f.gradient(x)
     y = f(x)
     for i in range(x.shape[0]):

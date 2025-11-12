@@ -12,8 +12,8 @@ def plot_surface(function: Function, resolution: int = 200, title: Optional[str]
     Plot a static 3D surface of a 2D function f([x, y]).
     """
     # Create meshgrid
-    x = np.linspace(*function.search_domain, resolution)
-    y = np.linspace(*function.search_domain, resolution)
+    x = np.linspace(*function.function_domain, resolution)
+    y = np.linspace(*function.function_domain, resolution)
     X, Y = np.meshgrid(x, y)
     Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)
 
@@ -41,8 +41,8 @@ def plot_surface_with_path(function: Function, x_history: np.ndarray, resolution
         "x_history must have shape (n_steps, 2)"
 
     # Compute surface
-    x = np.linspace(*function.search_domain, resolution)
-    y = np.linspace(*function.search_domain, resolution)
+    x = np.linspace(*function.function_domain, resolution)
+    y = np.linspace(*function.function_domain, resolution)
     X, Y = np.meshgrid(x, y)
     Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)
 
@@ -80,8 +80,8 @@ def animate_path_on_surface(function: Function, x_history: np.ndarray, resolutio
     z_history = np.array([function(x) for x in x_history])
 
     # Generate grid for surface
-    x_min, x_max = function.search_domain
-    y_min, y_max = function.search_domain
+    x_min, x_max = function.function_domain
+    y_min, y_max = function.function_domain
     X = np.linspace(x_min, x_max, resolution)
     Y = np.linspace(y_min, y_max, resolution)
     X, Y = np.meshgrid(X, Y)
@@ -131,7 +131,7 @@ def animate_population_on_surface(function: Function, population_history: np.nda
     Parameters
     ----------
     function : callable
-        A function f([x, y]) -> float, with attribute `search_domain` (tuple) and optionally `name`.
+        A function f([x, y]) -> float, with attribute `function_domain` (tuple) and optionally `name`.
     population_history : np.ndarray, shape (n_frames, population_size, 2)
         Population positions at each frame.
     resolution : int
@@ -151,8 +151,8 @@ def animate_population_on_surface(function: Function, population_history: np.nda
     assert dim == 2, "population_history must have shape (n_frames, population_size, 2)"
 
     # Compute surface
-    x_min, x_max = function.search_domain
-    y_min, y_max = function.search_domain
+    x_min, x_max = function.function_domain
+    y_min, y_max = function.function_domain
     X, Y = np.meshgrid(np.linspace(x_min, x_max, resolution),
                        np.linspace(y_min, y_max, resolution))
     Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)

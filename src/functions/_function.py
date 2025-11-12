@@ -11,7 +11,7 @@ class Function:
         return self.__class__.__name__
 
     @property
-    def search_domain(self) -> tuple[float, float]:
+    def function_domain(self) -> tuple[float, float]:
         return (-np.inf, np.inf)
     
     @property

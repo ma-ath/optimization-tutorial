@@ -37,6 +37,7 @@ class CMAES(Algorithm):
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
+                 search_domain: Optional[tuple[float, float]] = None,
                  verbose: bool = False) -> Result:
         """Optimize a given function using CMA-ES within a specified budget."""
         assert not (budget is None and stop_fitness is None), \
@@ -44,7 +45,8 @@ class CMAES(Algorithm):
         assert budget is None or population_size <= budget, \
             "Population size exceeds budget. You won't have enough budget for even starting your optimization."
         
-        search_lower_bound, search_upper_bound = function.search_domain
+        search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
+        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
 
         # Initialize CMA-ES optimizer
         cma = CMA(

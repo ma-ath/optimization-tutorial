@@ -29,6 +29,7 @@ class Algorithm:
 
     def optimize(self,
                  function: Function, *,
+                 search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True) -> Result:

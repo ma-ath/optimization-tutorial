@@ -24,6 +24,7 @@ class GradientDescent(Algorithm):
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
+                 search_domain: Optional[tuple[float, float]] = None,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Gradient Descent within a specified budget.
         
@@ -39,6 +40,10 @@ class GradientDescent(Algorithm):
         """
 
         self._n_func_calls = 0
+
+        search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
+        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
+
 
         if budget is None and stop_fitness is None:
             self._logger.error("Either budget or stop_fitness must be provided!")
@@ -62,7 +67,7 @@ class GradientDescent(Algorithm):
             self._n_func_calls += 1
 
             # Ensure x is within search domain
-            x = np.clip(x, function.search_domain[0], function.search_domain[1])
+            x = np.clip(x, search_lower_bound, search_upper_bound)
             x_history.append(x.copy())
 
             # Count one more function call for the fitness evaluation

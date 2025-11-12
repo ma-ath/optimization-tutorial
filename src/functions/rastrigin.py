@@ -22,7 +22,7 @@ class Rastrigin(Function):
                          [-4.52299366, 4.52299366]])
     
     @property
-    def search_domain(self) -> tuple[float, float]:
+    def function_domain(self) -> tuple[float, float]:
         return (-5.12, 5.12)
 
     def __init__(self, A: float = 10.0):
@@ -43,7 +43,7 @@ class Rastrigin(Function):
 
 if __name__ == "__main__":
     f = Rastrigin()
-    x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 3))
+    x = np.random.uniform(f.function_domain[0], f.function_domain[1], (5, 3))
     y = f(x)
     for i in range(x.shape[0]):
         assert y[i] == f(x[i])

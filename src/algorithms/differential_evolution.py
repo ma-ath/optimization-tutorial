@@ -29,6 +29,7 @@ class DifferentialEvolution(Algorithm):
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
+                 search_domain: Optional[tuple[float, float]] = None,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Differential Evolution within a specified budget."""
         assert population_size >= 4, "Population size must be at least 4."
@@ -37,7 +38,8 @@ class DifferentialEvolution(Algorithm):
 
         self._n_func_calls = 0
 
-        search_lower_bound, search_upper_bound = function.search_domain
+        search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
+        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
 
         # Randomly initialize population
         if initial_population is None:

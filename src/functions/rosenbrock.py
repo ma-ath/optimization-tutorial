@@ -15,7 +15,7 @@ class Rosenbrock(Function):
         return np.array([1.0, 1.0])
     
     @property
-    def search_domain(self) -> tuple[float, float]:
+    def function_domain(self) -> tuple[float, float]:
         return (-2.0, 2.0)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -32,7 +32,7 @@ class Rosenbrock(Function):
 
 if __name__ == "__main__":
     f = Rosenbrock()
-    x = np.random.uniform(f.search_domain[0], f.search_domain[1], (5, 3))
+    x = np.random.uniform(f.function_domain[0], f.function_domain[1], (5, 3))
     y = f(x)
     for i in range(x.shape[0]):
         print(f"Rosenbrock function value at {x[i]}: {y[i]}")

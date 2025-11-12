@@ -35,6 +35,7 @@ class GaussianEvolutionStrategy(Algorithm):
                  keep_elites_between_generations: bool = True,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
+                 search_domain: Optional[tuple[float, float]] = None,
                  minimize: bool = True,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Evolution Strategy within a specified budget."""
@@ -54,7 +55,8 @@ class GaussianEvolutionStrategy(Algorithm):
         self._n_func_calls = 0
 
         # Get search domain bounds
-        search_lower_bound, search_upper_bound = function.search_domain
+        search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
+        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
 
         # Initialize population variable
         population = None
