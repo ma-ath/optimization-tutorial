@@ -2,7 +2,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-from functions._function import Function
+from src.functions._function import Function
 
 
 def plot_surface(function: Function, resolution: int = 200):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from _function import Function
+from src.functions._function import Function
 
 
 class Ackley(Function):

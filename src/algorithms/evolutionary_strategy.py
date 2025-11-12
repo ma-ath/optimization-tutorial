@@ -25,33 +25,33 @@ def es(
         maximize: bool = False,
         verbose: bool = False) -> ResultType:
     """Simple Evolutionary Strategy (ES) implementation."""
-    number_of_function_evaluations = 0
+    number_of._function_evaluations = 0
 
     lower, upper = search_boundary
 
     # Randomly initialize population
     parents = torch.rand((n_parents, dimension)) * (upper - lower) + lower
     fitness = problem(parents)
-    number_of_function_evaluations += parents.shape[0]
+    number_of._function_evaluations += parents.shape[0]
 
     best_fitness_history = []
     mean_fitness_history = []
 
     # === Main loop ===
     pbar = tqdm(total=max_problem_evaluations, desc="ES Progress", disable=not verbose)
-    while number_of_function_evaluations < max_problem_evaluations:
+    while number_of._function_evaluations < max_problem_evaluations:
         # --- Generate λ offspring ---
         parents_indices = torch.randint(0, n_parents, (n_offspring,))
         parent = parents[parents_indices]
         offspring = parent + step_size * torch.randn(n_offspring, dimension)
         offspring = torch.clamp(offspring, lower, upper)
         
-        if number_of_function_evaluations + offspring.shape[0] > max_problem_evaluations:
+        if number_of._function_evaluations + offspring.shape[0] > max_problem_evaluations:
             # Limit evaluations if exceeding max allowed
-            offspring = offspring[:max_problem_evaluations - number_of_function_evaluations]
+            offspring = offspring[:max_problem_evaluations - number_of._function_evaluations]
         
         offspring_fitness = problem(offspring)
-        number_of_function_evaluations += offspring.shape[0]
+        number_of._function_evaluations += offspring.shape[0]
 
         # --- Selection ---
         if plus_strategy:
@@ -94,5 +94,5 @@ def es(
             "best": best_fitness_history,
             "mean": mean_fitness_history
         },
-        "n_evaluations": number_of_function_evaluations
+        "n_evaluations": number_of._function_evaluations
     }

@@ -2,8 +2,8 @@ from typing import Optional
 import numpy as np
 from tqdm.auto import tqdm
 
-from functions._function import Function
-from _algorithm import Algorithm, Result
+from src.functions._function import Function
+from src.algorithms._algorithm import Algorithm, Result
 
 
 class GradientDescent(Algorithm):

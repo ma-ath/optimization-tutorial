@@ -1,11 +1,11 @@
-from ackley import Ackley
-from rastrigin import Rastrigin
-from rosenbrock import Rosenbrock
-from sphere import Sphere
-from schwefel import Schwefel
-from griewank import Griewank
-from levy import Levy
-from himmelblau import Himmelblau
+from src.functions.ackley import Ackley
+from src.functions.rastrigin import Rastrigin
+from src.functions.rosenbrock import Rosenbrock
+from src.functions.sphere import Sphere
+from src.functions.schwefel import Schwefel
+from src.functions.griewank import Griewank
+from src.functions.levy import Levy
+from src.functions.himmelblau import Himmelblau
 
 
 __all__ = [

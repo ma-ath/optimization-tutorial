@@ -1,5 +1,5 @@
-from gradient_descent import GradientDescent
-from differential_evolution import DifferentialEvolution
+from src.algorithms.gradient_descent import GradientDescent
+from src.algorithms.differential_evolution import DifferentialEvolution
 
 
 __all__ = [

@@ -2,7 +2,7 @@ import numpy as np
 import logging
 from typing import TypedDict, NotRequired, Optional
 
-from functions._function import Function
+from src.functions._function import Function
 
 
 class Result(TypedDict):
