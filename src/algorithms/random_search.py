@@ -21,7 +21,7 @@ class RandomSearch(Algorithm):
                  function: Function, *,
                  function_dimension: int,
                  population_size: int = 20,
-                 initial_guess: Optional[np.ndarray] = None,
+                 initial_population: Optional[np.ndarray] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
@@ -30,7 +30,7 @@ class RandomSearch(Algorithm):
         """Optimize the given function using Random Search.
         Args:
             function (Function): The objective function to optimize.
-            initial_guess (Optional[np.ndarray], optional): The starting point for the optimization. Defaults to None.
+            initial_population (Optional[np.ndarray], optional): The starting point for the optimization. Defaults to None.
             budget (Optional[int], optional): Maximum number of function evaluations. Defaults to None.
             stop_fitness (Optional[float], optional): Target fitness value to stop optimization. Defaults to None.
             minimize (bool, optional): Whether to minimize or maximize the function. Defaults to True.
@@ -49,12 +49,12 @@ class RandomSearch(Algorithm):
             self._logger.error("Either budget or stop_fitness must be provided!")
             raise AssertionError("Either budget or stop_fitness must be provided!")
 
-        if initial_guess is not None:
-            if initial_guess.ndim == 1:
-                initial_guess = initial_guess[np.newaxis, :]
-            if initial_guess.shape[1] != function_dimension:
-                self._logger.error(f"Initial guess has incorrect dimension {initial_guess.shape[1]}, expected {function_dimension}")
-                raise ValueError(f"Initial guess has incorrect dimension {initial_guess.shape[1]}, expected {function_dimension}")
+        if initial_population is not None:
+            if initial_population.ndim == 1:
+                initial_population = initial_population[np.newaxis, :]
+            if initial_population.shape[1] != function_dimension:
+                self._logger.error(f"Initial guess has incorrect dimension {initial_population.shape[1]}, expected {function_dimension}")
+                raise ValueError(f"Initial guess has incorrect dimension {initial_population.shape[1]}, expected {function_dimension}")
 
         x_history = []
         fitness_history_best = []
@@ -65,9 +65,9 @@ class RandomSearch(Algorithm):
         pbar = tqdm(total=budget, desc="Random Search Optimization", disable=not verbose)
         while True:
             # Randomly sample new candidate solutions
-            if initial_guess is not None:
-                x = initial_guess
-                initial_guess = None  # Use initial guess only once
+            if initial_population is not None:
+                x = initial_population
+                initial_population = None  # Use initial guess only once
             else:
                 if budget is not None and self._n_func_calls + population_size > budget:
                     # Ensures we do not exceed the budget of function calls

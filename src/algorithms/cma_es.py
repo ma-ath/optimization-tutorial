@@ -22,11 +22,11 @@ class CMAES(Algorithm):
         return "Covariance Matrix Adaptation - Evolution Strategy (CMA-ES)"
 
     def __init__(self, *,
-                 mean0: np.ndarray | float = 0.0,
-                 sigma0: np.ndarray | float = 1.0):
+                 initial_mean: Optional[np.ndarray] = None,
+                 initial_sigma: Optional[float] = None):
         super().__init__()
-        self._mean0: np.ndarray = np.array(mean0)
-        self._sigma0: np.ndarray = np.array(sigma0)
+        self._initial_mean = initial_mean
+        self._initial_sigma = initial_sigma
         self._n_func_calls: int = 0
 
     def optimize(self,
@@ -49,9 +49,14 @@ class CMAES(Algorithm):
         assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
 
         # Initialize CMA-ES optimizer
+        if self._initial_mean is None:
+            self._initial_mean = np.zeros(function_dimension)
+        if self._initial_sigma is None:
+            self._initial_sigma = 1.0
+
         cma = CMA(
-            mean=self._mean0,
-            sigma=self._sigma0,
+            mean=self._initial_mean,
+            sigma=self._initial_sigma,
             bounds=np.array([search_lower_bound, search_upper_bound]).reshape(1, -1).repeat(function_dimension, axis=0),
             population_size=population_size
         )
@@ -133,7 +138,7 @@ if __name__ == "__main__":
     from functions import Sphere
 
     func = Sphere()
-    cma = CMAES(mean0=np.array([0.0, 0.0]), sigma0=0.5)
+    cma = CMAES(initial_mean=np.array([0.0, 0.0]), initial_sigma=0.5)
 
     result = cma.optimize(
         function=func,

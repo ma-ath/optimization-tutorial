@@ -20,7 +20,7 @@ class GradientDescent(Algorithm):
 
     def optimize(self,
                  function: Function, *,
-                 initial_guess: np.ndarray,
+                 initial_population: np.ndarray,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
@@ -30,7 +30,7 @@ class GradientDescent(Algorithm):
         
         Args:
             function (Function): The objective function to optimize.
-            initial_guess (np.ndarray): The starting point for the optimization.
+            initial_population (np.ndarray): The starting point for the optimization.
             budget (int): The maximum number of function evaluations.
             stop_fitness (Optional[float]): The target fitness value to reach.
             minimize (bool): Whether to minimize or maximize the function.
@@ -51,7 +51,7 @@ class GradientDescent(Algorithm):
 
         assert function.is_differentiable, "Function must be differentiable for Gradient Descent."
 
-        x = initial_guess
+        x = initial_population
         x_history = [x.copy()]
         fitness_history_best = []
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     result = gd.optimize(
         function=func,
-        initial_guess=np.array([10.0, 10.0, 10.0]),
+        initial_population=np.array([10.0, 10.0, 10.0]),
         budget=100,
         stop_fitness=1e-6,
         minimize=True
