@@ -1,4 +1,3 @@
-from algorithms.differential_evolution import DifferentialEvolution
 import numpy as np
 from typing import Optional
 from tqdm.auto import tqdm
@@ -100,8 +99,8 @@ class GaussianEvolutionStrategy(Algorithm):
             best_fitness_history.append(fitness_elite_set[0])
 
             # 4. Update distribution parameters
-            mu = np.mean(elite_set)
-            sigma = np.std(elite_set)
+            mu = np.mean(elite_set, axis=0)
+            sigma = np.std(elite_set, axis=0)
 
             # 5. Check stopping criteria
             pbar.update(population.shape[0])
@@ -133,9 +132,8 @@ if __name__ == "__main__":
 
     result = ges.optimize(
         function=func,
-        population_size=10,
-        function_dimension=10,
-        initial_population=None,
+        population_size=40,
+        function_dimension=2,
         keep_elites_between_generations=False,
         budget=1000,
         stop_fitness=None,
