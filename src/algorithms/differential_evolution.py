@@ -20,7 +20,7 @@ class DifferentialEvolution(Algorithm):
                  function: Function, *,
                  population_size: int,
                  function_dimension: int,
-                 initial_population: Optional[np.ndarray],
+                 initial_population: Optional[np.ndarray] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,

@@ -122,3 +122,75 @@ def animate_path_on_surface(function: Function, x_history: np.ndarray, resolutio
     anim = FuncAnimation(fig, update, frames=len(x_history), interval=interval, blit=False)
     plt.close(fig)
     return HTML(anim.to_jshtml())
+
+
+def animate_population_on_surface(function: Function, population_history: np.ndarray, resolution=100, interval=200, title=None):
+    """
+    Animate a population of points moving on a 3D function surface.
+
+    Parameters
+    ----------
+    function : callable
+        A function f([x, y]) -> float, with attribute `search_domain` (tuple) and optionally `name`.
+    population_history : np.ndarray, shape (n_frames, population_size, 2)
+        Population positions at each frame.
+    resolution : int
+        Grid resolution for surface plot.
+    interval : int
+        Time in milliseconds between frames.
+    title : str, optional
+        Figure title.
+
+    Returns
+    -------
+    HTML
+        An IPython HTML object displaying the animation.
+    """
+    population_history = np.array(population_history)
+    n_frames, population_size, dim = population_history.shape
+    assert dim == 2, "population_history must have shape (n_frames, population_size, 2)"
+
+    # Compute surface
+    x_min, x_max = function.search_domain
+    y_min, y_max = function.search_domain
+    X, Y = np.meshgrid(np.linspace(x_min, x_max, resolution),
+                       np.linspace(y_min, y_max, resolution))
+    Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)
+
+    # Evaluate population Z-values at each frame
+    # Shape: (n_frames, population_size)
+    Z_population = np.array([[function(population_history[f, i]) for i in range(population_size)]
+                             for f in range(n_frames)])
+
+    # Create figure
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Surface
+    ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8, linewidth=0)
+
+    # Initialize scatter for population
+    scatter = ax.scatter([], [], [], color='red', s=40)
+
+    # Labels
+    ax.set_xlabel('x₁')
+    ax.set_ylabel('x₂')
+    ax.set_zlabel('f(x₁, x₂)')
+    ax.set_title(title or getattr(function, 'name', 'Population on Surface'))
+
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.set_zlim(np.min(Z), np.max(Z))
+
+    # Animation update function
+    def update(frame):
+        xs = population_history[frame, :, 0]
+        ys = population_history[frame, :, 1]
+        zs = Z_population[frame, :]
+        scatter._offsets3d = (xs, ys, zs)
+        ax.set_title(f"{title or getattr(function, 'name', 'Population on Surface')}")
+        return scatter,
+
+    anim = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
+    plt.close(fig)  # Prevent static figure from displaying
+    return HTML(anim.to_jshtml())
