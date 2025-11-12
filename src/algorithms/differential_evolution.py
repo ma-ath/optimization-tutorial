@@ -48,6 +48,7 @@ class DifferentialEvolution(Algorithm):
 
         best_fitness_history = []
         mean_fitness_history = []
+        population_history = [population.copy()]
 
         # Optimization loop
         pbar = tqdm(total=budget, desc="DE Progress", disable=not verbose)
@@ -98,6 +99,7 @@ class DifferentialEvolution(Algorithm):
             best_idx = np.argmin(fitness) if minimize else np.argmax(fitness)
             best_fitness_history.append(fitness[best_idx].item())
             mean_fitness_history.append(fitness.mean().item())
+            population_history.append(population.copy())
 
             # Update progress bar
             pbar.set_postfix({"best_fitness": best_fitness_history[-1], "mean_fitness": mean_fitness_history[-1]})
@@ -107,20 +109,21 @@ class DifferentialEvolution(Algorithm):
             if budget is not None and self._n_func_calls >= budget:
                 break
  
-            if stop_fitness is not None and \
-                ((minimize and fitness[best_idx] <= stop_fitness) or \
-                 (not minimize and fitness[best_idx] >= stop_fitness)):
-                break
+            if stop_fitness is not None:
+                if (minimize and fitness[best_idx] <= stop_fitness) or (not minimize and fitness[best_idx] >= stop_fitness):
+                    break
 
         pbar.close()
 
         return {
             "x_opt": population[best_idx],
-            "f_opt": fitness[best_idx],
-            "x_history": {
+            "fitness_opt": fitness[best_idx],
+            "x_history": np.array(population_history),
+            "fitness_history": {
                 "best": np.array(best_fitness_history),
                 "mean": np.array(mean_fitness_history)
-            }
+            },
+            "used_budget": self._n_func_calls
         }
 
 
@@ -140,7 +143,3 @@ if __name__ == "__main__":
         minimize=True,
         verbose=True
     )
-
-    print("Optimized x:", result["x_opt"])
-    print("Function value at optimized x:", result["f_opt"])
-    print("Optimization history:", result["x_history"])

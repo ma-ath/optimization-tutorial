@@ -6,9 +6,15 @@ from src.functions._function import Function
 
 
 class Result(TypedDict):
+    class FitnessHistory(TypedDict):
+        best: np.ndarray
+        mean: NotRequired[np.ndarray]
+
     x_opt: np.ndarray
-    f_opt: float
-    x_history: NotRequired[list[np.ndarray] | dict[str, np.ndarray]]
+    fitness_opt: float
+    x_history: NotRequired[list[np.ndarray]]
+    fitness_history: NotRequired[FitnessHistory]
+    used_budget: NotRequired[int]
 
 
 class Algorithm:

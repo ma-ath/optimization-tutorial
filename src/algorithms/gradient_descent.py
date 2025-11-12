@@ -42,6 +42,7 @@ class GradientDescent(Algorithm):
 
         x = initial_guess
         x_history = [x.copy()]
+        fitness_history_best = []
 
         pbar = tqdm(total=budget, desc="Gradient Descent Optimization", disable=not verbose)
         while True:
@@ -51,14 +52,18 @@ class GradientDescent(Algorithm):
             else:
                 x = x + self._lr * function.gradient(x)
 
+            # Count one function call for the gradient evaluation
+            self._n_func_calls += 1
+
             # Ensure x is within search domain
             x = np.clip(x, function.search_domain[0], function.search_domain[1])
-
-            # Count the number of function evaluations
-            self._n_func_calls += 1
             x_history.append(x.copy())
 
+            # Count one more function call for the fitness evaluation
             fitness = function(x)
+            self._n_func_calls += 1
+            fitness_history_best.append(fitness)
+
             pbar.update(1)
 
             if budget is not None and self._n_func_calls >= budget:
@@ -71,8 +76,12 @@ class GradientDescent(Algorithm):
         pbar.close()
         return {
             "x_opt": x,
-            "f_opt": fitness,
-            "x_history": x_history
+            "fitness_opt": fitness,
+            "x_history": np.array(x_history),
+            "fitness_history": {
+                "best": np.array(fitness_history_best)
+            },
+            "used_budget": self._n_func_calls
         }
 
 
@@ -91,5 +100,6 @@ if __name__ == "__main__":
     )
 
     print("Optimized x:", result["x_opt"])
-    print("Function value at optimized x:", result["f_opt"])
+    print("Function value at optimized x:", result["fitness_opt"])
     print("Optimization history:", result["x_history"])
+    print("Fitness history:", result["fitness_history"]["best"])
