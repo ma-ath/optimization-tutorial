@@ -7,7 +7,8 @@ from src.functions._function import Function
 
 class Result(TypedDict):
     x_opt: np.ndarray
-    x_history: NotRequired[list[np.ndarray]]
+    f_opt: float
+    x_history: NotRequired[list[np.ndarray] | dict[str, np.ndarray]]
 
 
 class Algorithm:

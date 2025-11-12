@@ -71,6 +71,7 @@ class GradientDescent(Algorithm):
         pbar.close()
         return {
             "x_opt": x,
+            "f_opt": fitness,
             "x_history": x_history
         }
 
@@ -90,5 +91,5 @@ if __name__ == "__main__":
     )
 
     print("Optimized x:", result["x_opt"])
-    print("Function value at optimized x:", func(result["x_opt"]))
+    print("Function value at optimized x:", result["f_opt"])
     print("Optimization history:", result["x_history"])

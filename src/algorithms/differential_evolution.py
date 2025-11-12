@@ -25,11 +25,16 @@ class DifferentialEvolution(Algorithm):
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
                  verbose: bool = False) -> Result:
+        """Optimize a given function using Differential Evolution within a specified budget."""
+        assert population_size >= 4, "Population size must be at least 4."
+        assert not (budget is None and stop_fitness is None), \
+            "Either budget or stop_fitness must be provided!"
+
         search_lower_bound, search_upper_bound = function.search_domain
 
         # Randomly initialize population
         if initial_population is None:
-            population = np.random.rand((population_size, function_dimension)) * (search_upper_bound - search_lower_bound) + search_lower_bound
+            population = np.random.rand(population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
         else:
             assert initial_population.shape == (population_size, function_dimension), \
                 "Initial population shape mismatch. Be sure it matches (population_size, function_dimension)."
@@ -46,15 +51,17 @@ class DifferentialEvolution(Algorithm):
 
         # Optimization loop
         pbar = tqdm(total=budget, desc="DE Progress", disable=not verbose)
-        while self._n_func_calls < budget:
-            raise NotImplementedError("Differential Evolution optimization not yet implemented.")
+        while True:
             # Pick three *distinct* indices not equal itself.
-            idxs = np.arange(population_size).reshape(-1, 1).repeat(population_size, axis=1)
+            idxs = np.arange(population_size).reshape(1, -1).repeat(population_size, axis=0)
             mask = np.eye(population_size, dtype=bool)
             idxs = idxs[~mask].reshape(population_size, population_size - 1)
 
-            permutation = np.random.permutation(population_size - 1)[:3]
-            r = idxs[np.arange(population_size)[:, None], permutation]
+            permutations = np.vstack([
+                np.random.permutation(population_size - 1)[:3]
+                for _ in range(population_size)
+            ])
+            r = idxs.take(permutations)
             assert r.shape[1] >= 3
             candidates = population[r]  # Shape: (n_population, 3, dim)
 
@@ -69,7 +76,7 @@ class DifferentialEvolution(Algorithm):
             trials = np.where(cross_points, mutants, population)
 
             # Selection
-            if self._n_func_calls + trials.shape[0] <= budget:
+            if budget is None or self._n_func_calls + trials.shape[0] <= budget:
                 f_trials = function(trials)
                 self._n_func_calls += f_trials.shape[0]
             else:
@@ -96,20 +103,24 @@ class DifferentialEvolution(Algorithm):
             pbar.set_postfix({"best_fitness": best_fitness_history[-1], "mean_fitness": mean_fitness_history[-1]})
             pbar.update(trials.shape[0])
 
-            if (minimize and fitness[best_idx] <= stop_fitness) or \
-               (not minimize and fitness[best_idx] >= stop_fitness):
+            # Check stopping criteria
+            if budget is not None and self._n_func_calls >= budget:
+                break
+ 
+            if stop_fitness is not None and \
+                ((minimize and fitness[best_idx] <= stop_fitness) or \
+                 (not minimize and fitness[best_idx] >= stop_fitness)):
                 break
 
         pbar.close()
 
         return {
-            "best_solution": population[best_idx],
-            "best_fitness": fitness[best_idx],
-            "fitness_history": {
-                "best": best_fitness_history,
-                "mean": mean_fitness_history
-            },
-            "n_evaluations": self._n_func_calls
+            "x_opt": population[best_idx],
+            "f_opt": fitness[best_idx],
+            "x_history": {
+                "best": np.array(best_fitness_history),
+                "mean": np.array(mean_fitness_history)
+            }
         }
 
 
@@ -122,13 +133,14 @@ if __name__ == "__main__":
     result = de.optimize(
         function=func,
         population_size=20,
-        function_dimension=3,
+        function_dimension=10,
         initial_population=None,
-        budget=100,
-        stop_fitness=1e-6,
-        minimize=True
+        budget=1000,
+        stop_fitness=None,
+        minimize=True,
+        verbose=True
     )
 
-    print("Optimized x:", result["best_solution"])
-    print("Function value at optimized x:", result["best_fitness"])
-    print("Optimization history:", result["fitness_history"])
+    print("Optimized x:", result["x_opt"])
+    print("Function value at optimized x:", result["f_opt"])
+    print("Optimization history:", result["x_history"])
