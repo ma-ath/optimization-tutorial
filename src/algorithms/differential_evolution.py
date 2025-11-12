@@ -47,8 +47,9 @@ class DifferentialEvolution(Algorithm):
                 "Initial population size exceeds budget. You won't have enough budget for even starting your optimization."
             population = np.random.rand(population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
         else:
-            assert initial_population.shape == (population_size, function_dimension), \
-                "Initial population shape mismatch. Be sure it matches (population_size, function_dimension)."
+            assert initial_population.shape[0] >= 4, "Initial population size must be at least 4."
+            assert initial_population.shape[1] == function_dimension, \
+                "Initial population dimension does not match the specified function dimension."
             assert budget is None or initial_population.shape[0] <= budget, \
                 "Initial population size exceeds budget. You won't have enough budget for even starting your optimization."
             population = initial_population
