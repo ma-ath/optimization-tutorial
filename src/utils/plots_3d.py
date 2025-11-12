@@ -69,57 +69,103 @@ def plot_surface_with_path(function: Function, x_history: np.ndarray, resolution
     plt.show()
 
 
-def animate_path_on_surface(function: Function, x_history: np.ndarray, resolution=100, interval=100, title: Optional[str] = None):
+def animate_path_on_surface(
+    function: Function,
+    *x_histories: np.ndarray,
+    resolution: int = 100,
+    interval: int = 100,
+    title: Optional[str] = None,
+):
     """
-    3D animation of the optimization path on the surface defined by `function`.
-    Works entirely in Jupyter using Matplotlib.
+    Animate one or multiple optimization paths or populations on a 3D surface.
+
+    Each individual (or single optimizer) leaves a red trajectory trail.
     """
+    if len(x_histories) == 1 and isinstance(x_histories[0], (list, np.ndarray)):
+        x_histories = (x_histories[0],)
 
-    # Convert x_history to numpy array
-    x_history = np.array(x_history)
-    z_history = np.array([function(x) for x in x_history])
-
-    # Generate grid for surface
+    # Surface grid
     x_min, x_max = function.function_domain
     y_min, y_max = function.function_domain
-    X = np.linspace(x_min, x_max, resolution)
-    Y = np.linspace(y_min, y_max, resolution)
-    X, Y = np.meshgrid(X, Y)
+    X, Y = np.meshgrid(np.linspace(x_min, x_max, resolution),
+                       np.linspace(y_min, y_max, resolution))
     Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)
 
-    # Create 3D figure
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111, projection='3d')
+    # Figure setup
+    fig = plt.figure(figsize=(9, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    ax.plot_surface(X, Y, Z, cmap="viridis", alpha=0.8, linewidth=0)
 
-    # Draw surface
-    ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8, linewidth=0)
+    # Precompute trajectories and function values
+    histories_data = []
+    for hist in x_histories:
+        arr = np.array(hist)
+        if arr.ndim == 2:  # single trajectory
+            z_vals = np.array([function(x) for x in arr])
+            histories_data.append({"type": "path", "x": arr, "z": z_vals})
+        elif arr.ndim == 3:  # population
+            n_frames, pop_size, _ = arr.shape
+            z_vals = np.array([[function(arr[f, i]) for i in range(pop_size)] for f in range(n_frames)])
+            histories_data.append({"type": "population", "x": arr, "z": z_vals})
+        else:
+            raise ValueError("Each x_history must have shape (n_frames, 2) or (n_frames, population_size, 2)")
 
-    # Initialize path and current point
-    (path_line,) = ax.plot([], [], [], color='red', lw=2)
-    point = ax.scatter([], [], [], color='black', s=50)
+    # Initialize artists
+    scatters, all_lines = [], []
+    for h in histories_data:
+        if h["type"] == "path":
+            # thick bright red line + black moving dot
+            (line,) = ax.plot([], [], [], color="red", lw=3)
+            scat = ax.scatter([], [], [], color="black", s=60, zorder=10)
+            scatters.append(scat)
+            all_lines.append([line])
+        elif h["type"] == "population":
+            n_frames, pop_size, _ = h["x"].shape
+            # slightly transparent red trails for each individual
+            lines = [
+                ax.plot([], [], [], color="red", alpha=0.5, lw=1.5, zorder=5)[0]
+                for _ in range(pop_size)
+            ]
+            scat = ax.scatter([], [], [], color="black", s=25, zorder=10)
+            scatters.append(scat)
+            all_lines.append(lines)
 
     # Configure axes
-    ax.set_xlabel('x₁')
-    ax.set_ylabel('x₂')
-    ax.set_zlabel('f(x₁, x₂)')
-    ax.set_title(title or getattr(function, 'name', 'Optimization surface'))
-
+    ax.set_xlabel("x₁")
+    ax.set_ylabel("x₂")
+    ax.set_zlabel("f(x₁, x₂)")
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
     ax.set_zlim(np.min(Z), np.max(Z))
+    ax.set_title(title or getattr(function, "name", "Optimization Surface"))
+
+    n_frames = max(h["x"].shape[0] for h in histories_data)
 
     # Animation update
     def update(frame):
-        path_line.set_data(x_history[:frame, 0], x_history[:frame, 1])
-        path_line.set_3d_properties(z_history[:frame])
-        point._offsets3d = (
-            [x_history[frame, 0]],
-            [x_history[frame, 1]],
-            [z_history[frame]],
-        )
-        return path_line, point
+        for h, lines, scat in zip(histories_data, all_lines, scatters):
+            arr, z_vals = h["x"], h["z"]
+            if h["type"] == "path":
+                if frame < len(arr):
+                    lines[0].set_data(arr[:frame, 0], arr[:frame, 1])
+                    lines[0].set_3d_properties(z_vals[:frame])
+                    scat._offsets3d = (
+                        [arr[frame, 0]],
+                        [arr[frame, 1]],
+                        [z_vals[frame]],
+                    )
+            elif h["type"] == "population":
+                if frame < len(arr):
+                    xs = arr[frame, :, 0]
+                    ys = arr[frame, :, 1]
+                    zs = z_vals[frame, :]
+                    scat._offsets3d = (xs, ys, zs)
+                    for i, line in enumerate(lines):
+                        line.set_data(arr[:frame + 1, i, 0], arr[:frame + 1, i, 1])
+                        line.set_3d_properties(z_vals[:frame + 1, i])
+        return sum(all_lines, []) + scatters
 
-    anim = FuncAnimation(fig, update, frames=len(x_history), interval=interval, blit=False)
+    anim = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
     plt.close(fig)
     return HTML(anim.to_jshtml())
 
