@@ -14,11 +14,11 @@ class GaussianEvolutionStrategy(Algorithm):
         https://pymoo.org/algorithms/soo/es.html
     """
     def __init__(self, *,
-                 mean0: float = 0.0,
-                 sigma0: float = 1.0):
+                 mean0: np.ndarray = 0.0,
+                 sigma0: np.ndarray = 1.0):
         super().__init__()
-        self._mean0: float = mean0
-        self._sigma0: float = sigma0
+        self._mean0: np.ndarray = mean0
+        self._sigma0: np.ndarray = sigma0
         self._n_func_calls: int = 0
 
     def optimize(self,
@@ -102,8 +102,11 @@ class GaussianEvolutionStrategy(Algorithm):
             mu = np.mean(elite_set, axis=0)
             sigma = np.std(elite_set, axis=0)
 
-            # 5. Check stopping criteria
+            # Update progress bar
             pbar.update(population.shape[0])
+            pbar.set_postfix({"best_fitness": best_fitness_history[-1], "mean_fitness": mean_fitness_history[-1]})
+
+            # 5. Check stopping criteria
             if budget is not None and self._n_func_calls >= budget:
                 break
             if stop_fitness is not None:
@@ -111,6 +114,8 @@ class GaussianEvolutionStrategy(Algorithm):
                     break
                 if not minimize and np.max(fitness) >= stop_fitness:
                     break
+
+        pbar.close()
 
         return {
             "x_opt": elite_set[0],

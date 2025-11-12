@@ -36,6 +36,8 @@ class DifferentialEvolution(Algorithm):
 
         # Randomly initialize population
         if initial_population is None:
+            assert budget is None or population_size <= budget, \
+                "Initial population size exceeds budget. You won't have enough budget for even starting your optimization."
             population = np.random.rand(population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
         else:
             assert initial_population.shape == (population_size, function_dimension), \

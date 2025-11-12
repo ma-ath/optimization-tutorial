@@ -66,7 +66,9 @@ class GradientDescent(Algorithm):
             self._n_func_calls += 1
             fitness_history_best.append(fitness)
 
+            # Update progress bar
             pbar.update(1)
+            pbar.set_postfix({"best_fitness": fitness})
 
             if budget is not None and self._n_func_calls >= budget:
                 break
