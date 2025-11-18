@@ -19,13 +19,13 @@ class RandomSearch(Algorithm):
 
     def optimize(self,
                  function: Function, *,
-                 function_dimension: int,
-                 population_size: int = 20,
                  initial_population: Optional[np.ndarray] = None,
+                 max_population_size: int = 20,
+                 search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
-                 search_domain: Optional[tuple[float, float]] = None,
+                 function_dimension: int,
                  verbose: bool = False) -> Result:
         """Optimize the given function using Random Search.
         Args:
@@ -69,13 +69,13 @@ class RandomSearch(Algorithm):
                 x = initial_population
                 initial_population = None  # Use initial guess only once
             else:
-                if budget is not None and self._n_func_calls + population_size > budget:
+                if budget is not None and self._n_func_calls + max_population_size > budget:
                     # Ensures we do not exceed the budget of function calls
-                    population_size = budget - self._n_func_calls
+                    max_population_size = budget - self._n_func_calls
                 x = np.random.uniform(
                     low=search_lower_bound,
                     high=search_upper_bound,
-                    size=(population_size, function_dimension)
+                    size=(max_population_size, function_dimension)
                 )
             x_history.append(x.copy())
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     result = ges.optimize(
         function=func,
-        population_size=40,
+        max_population_size=40,
         function_dimension=2,
         budget=1000,
         stop_fitness=None,

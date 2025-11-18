@@ -31,18 +31,18 @@ class CMAES(Algorithm):
 
     def optimize(self,
                  function: Function, *,
-                 population_size: int,
-                 function_dimension: int,
                  initial_population: Optional[np.ndarray] = None,
+                 max_population_size: int,
+                 search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
-                 search_domain: Optional[tuple[float, float]] = None,
+                 function_dimension: int,
                  verbose: bool = False) -> Result:
         """Optimize a given function using CMA-ES within a specified budget."""
         assert not (budget is None and stop_fitness is None), \
             "Either budget or stop_fitness must be provided!"
-        assert budget is None or population_size <= budget, \
+        assert budget is None or max_population_size <= budget, \
             "Population size exceeds budget. You won't have enough budget for even starting your optimization."
         
         search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
@@ -58,7 +58,7 @@ class CMAES(Algorithm):
             mean=self._initial_mean,
             sigma=self._initial_sigma,
             bounds=np.array([search_lower_bound, search_upper_bound]).reshape(1, -1).repeat(function_dimension, axis=0),
-            population_size=population_size
+            max_population_size=max_population_size
         )
         self._n_func_calls = 0
         population = None
@@ -84,10 +84,10 @@ class CMAES(Algorithm):
                 population = np.clip(population, search_lower_bound, search_upper_bound)
             else:
                 # Subsequent runs: Sample around the mean and std of the elite set
-                if budget is None or self._n_func_calls + population_size > budget:
+                if budget is None or self._n_func_calls + max_population_size > budget:
                     # Limit evaluations if exceeding max allowed budget
-                    population_size = budget - self._n_func_calls
-                population = np.vstack([cma.ask() for _ in range(population_size)])
+                    max_population_size = budget - self._n_func_calls
+                population = np.vstack([cma.ask() for _ in range(max_population_size)])
             population_history.append(population.copy())
 
             # 2. Evaluate fitness
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     result = cma.optimize(
         function=func,
-        population_size=40,
+        max_population_size=40,
         function_dimension=2,
         budget=1000,
         stop_fitness=None,

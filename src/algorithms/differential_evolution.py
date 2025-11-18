@@ -23,16 +23,16 @@ class DifferentialEvolution(Algorithm):
 
     def optimize(self,
                  function: Function, *,
-                 population_size: int,
-                 function_dimension: int,
                  initial_population: Optional[np.ndarray] = None,
+                 max_population_size: int,
+                 search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
-                 search_domain: Optional[tuple[float, float]] = None,
+                 function_dimension: int,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Differential Evolution within a specified budget."""
-        assert population_size >= 4, "Population size must be at least 4."
+        assert max_population_size >= 4, "Population size must be at least 4."
         assert not (budget is None and stop_fitness is None), \
             "Either budget or stop_fitness must be provided!"
 
@@ -43,9 +43,9 @@ class DifferentialEvolution(Algorithm):
 
         # Randomly initialize population
         if initial_population is None:
-            assert budget is None or population_size <= budget, \
+            assert budget is None or max_population_size <= budget, \
                 "Initial population size exceeds budget. You won't have enough budget for even starting your optimization."
-            population = np.random.rand(population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
+            population = np.random.rand(max_population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
         else:
             assert initial_population.shape[0] >= 4, "Initial population size must be at least 4."
             assert initial_population.shape[1] == function_dimension, \
@@ -66,13 +66,13 @@ class DifferentialEvolution(Algorithm):
         pbar = tqdm(total=budget, desc="DE Progress", disable=not verbose)
         while True:
             # Pick three *distinct* indices not equal itself.
-            idxs = np.arange(population_size).reshape(1, -1).repeat(population_size, axis=0)
-            mask = np.eye(population_size, dtype=bool)
-            idxs = idxs[~mask].reshape(population_size, population_size - 1)
+            idxs = np.arange(max_population_size).reshape(1, -1).repeat(max_population_size, axis=0)
+            mask = np.eye(max_population_size, dtype=bool)
+            idxs = idxs[~mask].reshape(max_population_size, max_population_size - 1)
 
             permutations = np.vstack([
-                np.random.permutation(population_size - 1)[:3]
-                for _ in range(population_size)
+                np.random.permutation(max_population_size - 1)[:3]
+                for _ in range(max_population_size)
             ])
             r = idxs.take(permutations)
             assert r.shape[1] >= 3
@@ -83,9 +83,9 @@ class DifferentialEvolution(Algorithm):
             mutants = np.clip(mutants, search_lower_bound, search_upper_bound)
 
             # Crossover (binomial)
-            cross_points = np.random.rand(population_size, function_dimension) < self._CR
-            j_rand = np.random.randint(0, function_dimension, (population_size,))
-            cross_points[np.arange(population_size), j_rand] = True
+            cross_points = np.random.rand(max_population_size, function_dimension) < self._CR
+            j_rand = np.random.randint(0, function_dimension, (max_population_size,))
+            cross_points[np.arange(max_population_size), j_rand] = True
             trials = np.where(cross_points, mutants, population)
 
             # Selection
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 
     result = de.optimize(
         function=func,
-        population_size=20,
+        max_population_size=20,
         function_dimension=10,
         initial_population=None,
         budget=1000,

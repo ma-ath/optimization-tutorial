@@ -28,23 +28,23 @@ class GaussianEvolutionStrategy(Algorithm):
 
     def optimize(self,
                  function: Function, *,
-                 population_size: int,
-                 function_dimension: int,
                  initial_population: Optional[np.ndarray] = None,
-                 elite_size: Optional[int] = None,
-                 keep_elites_between_generations: bool = True,
+                 max_population_size: int,
+                 search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
-                 search_domain: Optional[tuple[float, float]] = None,
                  minimize: bool = True,
+                 function_dimension: int,
+                 elite_size: Optional[int] = None,
+                 keep_elites_between_generations: bool = True,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Evolution Strategy within a specified budget."""
         assert not (budget is None and stop_fitness is None), \
             "Either budget or stop_fitness must be provided!"
         if elite_size is not None:
-            assert elite_size < population_size, "Elite size must be smaller than population size."
+            assert elite_size < max_population_size, "Elite size must be smaller than population size."
         else:
-            elite_size = population_size // 4  # Default elite size is 1/4 of population size. I choose this value arbitrarily.
+            elite_size = max_population_size // 4  # Default elite size is 1/4 of population size. I choose this value arbitrarily.
         if initial_population is not None:
             assert initial_population.ndim == 2, "Initial population must be a 2D array."
             assert initial_population.shape[0] <= budget, \
@@ -74,14 +74,14 @@ class GaussianEvolutionStrategy(Algorithm):
                 # First run: Initialize population
                 if initial_population is None:
                     # Randomly initialize population within search bounds
-                    population = np.random.rand(population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
+                    population = np.random.rand(max_population_size, function_dimension) * (search_upper_bound - search_lower_bound) + search_lower_bound
                 else:
                     population = initial_population
                 # Ensure population is within bounds
                 population = np.clip(population, search_lower_bound, search_upper_bound)
             else:
                 # Subsequent runs: Sample around the mean and std of the elite set
-                population = np.random.randn(population_size, function_dimension) * sigma + mu
+                population = np.random.randn(max_population_size, function_dimension) * sigma + mu
                 population = np.clip(population, search_lower_bound, search_upper_bound)
 
                 # If we are keeping elites between generations, insert them into the new population
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     result = ges.optimize(
         function=func,
-        population_size=40,
+        max_population_size=40,
         function_dimension=2,
         keep_elites_between_generations=False,
         budget=1000,

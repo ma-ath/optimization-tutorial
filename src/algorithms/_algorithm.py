@@ -29,6 +29,8 @@ class Algorithm:
 
     def optimize(self,
                  function: Function, *,
+                 initial_population: Optional[np.ndarray] = None,
+                 max_population_size: Optional[int] = None,
                  search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,

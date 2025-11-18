@@ -21,10 +21,11 @@ class GradientDescent(Algorithm):
     def optimize(self,
                  function: Function, *,
                  initial_population: np.ndarray,
+                 max_population_size: Optional[int] = None,
+                 search_domain: Optional[tuple[float, float]] = None,
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
-                 search_domain: Optional[tuple[float, float]] = None,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Gradient Descent within a specified budget.
         
@@ -44,6 +45,9 @@ class GradientDescent(Algorithm):
         search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
         assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
 
+        if max_population_size is not None:
+            assert initial_population.shape[0] <= max_population_size, \
+                "Initial population size exceeds max_population_size."
 
         if budget is None and stop_fitness is None:
             self._logger.error("Either budget or stop_fitness must be provided!")
