@@ -166,8 +166,8 @@ def animate_path_on_surface(
         return sum(all_lines, []) + scatters
 
     anim = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
-    plt.close(fig)
-    return HTML(anim.to_jshtml())
+    plt.close(fig)  # Prevent static figure from displaying
+    return anim
 
 
 def animate_population_on_surface(function: Function, population_history: np.ndarray, resolution=100, interval=200, title=None):
@@ -239,4 +239,162 @@ def animate_population_on_surface(function: Function, population_history: np.nda
 
     anim = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
     plt.close(fig)  # Prevent static figure from displaying
-    return HTML(anim.to_jshtml())
+    return anim
+
+def plot_grid_with_functions(functions: list[Function], resolution: int = 200, n_cols: Optional[int] = None):
+    """
+    Plot a grid of 3D surfaces for multiple functions.
+    """
+    n_funcs = len(functions)
+    n_cols = n_cols or int(np.ceil(np.sqrt(n_funcs)))
+    n_rows = int(np.ceil(n_funcs / n_cols))
+
+    fig = plt.figure(figsize=(5 * n_cols, 4 * n_rows))
+
+    for i, function in enumerate(functions):
+        ax = fig.add_subplot(n_rows, n_cols, i + 1, projection='3d')
+
+        # Create meshgrid
+        x = np.linspace(*function.function_domain, resolution)
+        y = np.linspace(*function.function_domain, resolution)
+        X, Y = np.meshgrid(x, y)
+        Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)
+
+        # Plot surface
+        surf = ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.85, linewidth=0)
+
+        # Labels and styling
+        ax.set_xlabel('x₁')
+        ax.set_ylabel('x₂')
+        ax.set_zlabel('f(x₁, x₂)')
+        ax.set_title(getattr(function, "name", f"Function {i+1}"))
+
+    plt.tight_layout()
+    plt.show()
+
+def animate_population_on_grid_of_surfaces(
+    functions: list[Function],
+    x_history: list[np.ndarray],
+    resolution: int = 100,
+    interval: int = 200,
+    title: Optional[str] = None,
+):
+    """
+    Animate populations/trajectories on a grid of 3D function surfaces.
+
+    - functions: list of Function objects
+    - x_history: list of arrays, one per function. Each array can be:
+        * shape (n_steps, 2) for a single trajectory
+        * shape (n_frames, population_size, 2) for a population over time
+
+    The animation will use the maximum number of frames across histories. Shorter
+    histories are padded by repeating their last frame.
+
+    Note: red trail lines have been removed; only moving scatter points are shown.
+    """
+    assert len(functions) == len(x_history), "functions and x_history must have the same length"
+
+    # Normalize histories to arrays and collect original frame counts
+    raw_histories = [np.array(h) for h in x_history]
+    orig_frames = []
+    for arr in raw_histories:
+        if arr.ndim == 2:
+            orig_frames.append(arr.shape[0])
+        elif arr.ndim == 3:
+            orig_frames.append(arr.shape[0])
+        else:
+            raise ValueError("Each x_history element must have shape (n_steps, 2) or (n_frames, population_size, 2)")
+    n_frames = max(orig_frames)
+
+    # Prepare figure grid
+    n_funcs = len(functions)
+    n_cols = int(np.ceil(np.sqrt(n_funcs)))
+    n_rows = int(np.ceil(n_funcs / n_cols))
+    fig = plt.figure(figsize=(5 * n_cols, 4 * n_rows))
+
+    axes = []
+    histories_data = []  # per-function dicts with standardized shapes
+    for i, (function, raw) in enumerate(zip(functions, raw_histories)):
+        ax = fig.add_subplot(n_rows, n_cols, i + 1, projection="3d")
+        axes.append(ax)
+
+        # Surface mesh
+        x_min, x_max = function.function_domain
+        y_min, y_max = function.function_domain
+        X, Y = np.meshgrid(np.linspace(x_min, x_max, resolution),
+                           np.linspace(y_min, y_max, resolution))
+        Z = np.vectorize(lambda a, b: function(np.array([a, b])))(X, Y)
+        ax.plot_surface(X, Y, Z, cmap="viridis", alpha=0.8, linewidth=0)
+
+        # Standardize history to shape (n_frames, pop_size, 2)
+        arr = raw
+        if arr.ndim == 2:
+            # single trajectory -> pop_size = 1
+            orig = arr.copy()
+            pop_size = 1
+            # pad to n_frames by repeating last row
+            if orig.shape[0] < n_frames:
+                pad = np.repeat(orig[-1:, :], n_frames - orig.shape[0], axis=0)
+                padded = np.vstack([orig, pad])
+            else:
+                padded = orig[:n_frames]
+            padded = padded.reshape(n_frames, 1, 2)
+        else:  # ndim == 3
+            orig = arr.copy()
+            pop_size = orig.shape[1]
+            if orig.shape[0] < n_frames:
+                last = orig[-1, :, :][None, ...]
+                pad = np.repeat(last, n_frames - orig.shape[0], axis=0)
+                padded = np.vstack([orig, pad])
+            else:
+                padded = orig[:n_frames]
+        # Precompute Z-values per frame and individual: shape (n_frames, pop_size)
+        Z_vals = np.array([[function(padded[f, j]) for j in range(padded.shape[1])]
+                           for f in range(n_frames)])
+
+        histories_data.append({
+            "function": function,
+            "X": X, "Y": Y, "Z": Z,
+            "x": padded,      # (n_frames, pop_size, 2)
+            "z": Z_vals,      # (n_frames, pop_size)
+            "ax": ax,
+        })
+
+        # Axes styling
+        ax.set_xlabel("x₁")
+        ax.set_ylabel("x₂")
+        ax.set_zlabel("f(x₁, x₂)")
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+        ax.set_zlim(np.min(Z), np.max(Z))
+        ax.set_title(getattr(function, "name", f"Function {i+1}"))
+        ax.view_init(elev=30, azim=-60)
+
+    # Initialize scatter artists for each subplot (no trail lines)
+    scatters = []
+    for h in histories_data:
+        pop_size = h["x"].shape[1]
+        ax = h["ax"]
+        scat = ax.scatter([], [], [], color="black", s=(60 if pop_size == 1 else 25), zorder=10)
+        scatters.append(scat)
+
+    # Animation update
+    def update(frame):
+        artists = []
+        for h, scat in zip(histories_data, scatters):
+            arr = h["x"]      # (n_frames, pop_size, 2)
+            z_vals = h["z"]   # (n_frames, pop_size)
+            current = min(frame, arr.shape[0] - 1)
+
+            xs = np.asarray(arr[current, :, 0], dtype=float).reshape(-1)
+            ys = np.asarray(arr[current, :, 1], dtype=float).reshape(-1)
+            zs = np.asarray(z_vals[current, :], dtype=float).reshape(-1)
+
+            scat._offsets3d = (xs, ys, zs)
+            artists.append(scat)
+
+        return artists
+
+    anim = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
+    plt.close(fig)  # Prevent static figure from displaying
+    return anim
