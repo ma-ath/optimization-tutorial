@@ -1,8 +1,6 @@
 import numpy as np
-from typing import Optional, Any
 from cocoex import Problem
 
-from src.algorithms._algorithm import Algorithm
 from src.functions._function import Function
 
 
@@ -12,16 +10,14 @@ class CocoProblemWrapper(Function):
     @property
     def name(self) -> str:
         return f"{self.problem.name}"
-    
+
     @property
-    def function_domain(self) -> tuple[float, float]:
-        return self.problem.lower_bounds[0], self.problem.upper_bounds[0]
+    def function_domain(self) -> tuple[np.ndarray, np.ndarray]:
+        return np.array(self.problem.lower_bounds), np.array(self.problem.upper_bounds)
 
     def __init__(self,
-                 problem: Problem,
-                 x0: Optional[np.ndarray] = None) -> None:
+                 problem: Problem) -> None:
         self.problem = problem
-        self.x0 = x0
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         x_coco = []
@@ -34,8 +30,8 @@ if __name__ == "__main__":
     from cocoex import Suite
     from src.algorithms import DifferentialEvolution
     suite = Suite(
-        suite_name="bbob", 
-        suite_instance="year: 2009", 
+        suite_name="bbob",
+        suite_instance="year: 2009",
         suite_options="function_indices: 1 instance_indices: 1-10 dimensions: 2,20"
     )
     problem = suite[0]
