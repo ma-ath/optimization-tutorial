@@ -39,7 +39,16 @@ class DifferentialEvolution(Algorithm):
         self._n_func_calls = 0
 
         search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
-        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
+        if type(search_lower_bound) is float:
+            search_lower_bound = np.full((function_dimension,), search_lower_bound)
+        if type(search_upper_bound) is float:
+            search_upper_bound = np.full((function_dimension,), search_upper_bound)
+        assert len(search_lower_bound) == function_dimension, \
+            "search_lower_bound length mismatch. Be sure it matches function_dimension argument."
+        assert len(search_upper_bound) == function_dimension, \
+            "search_upper_bound length mismatch. Be sure it matches function_dimension argument."
+        assert np.all(search_upper_bound > search_lower_bound), \
+            "search_upper_bound must be greater than search_lower_bound for all dimensions."
 
         # Randomly initialize population
         if initial_population is None:

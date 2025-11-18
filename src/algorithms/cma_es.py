@@ -44,9 +44,18 @@ class CMAES(Algorithm):
             "Either budget or stop_fitness must be provided!"
         assert budget is None or max_population_size <= budget, \
             "Population size exceeds budget. You won't have enough budget for even starting your optimization."
-        
+
         search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
-        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
+        if type(search_lower_bound) is float:
+            search_lower_bound = np.full((function_dimension,), search_lower_bound)
+        if type(search_upper_bound) is float:
+            search_upper_bound = np.full((function_dimension,), search_upper_bound)
+        assert len(search_lower_bound) == function_dimension, \
+            "search_lower_bound length mismatch. Be sure it matches function_dimension argument."
+        assert len(search_upper_bound) == function_dimension, \
+            "search_upper_bound length mismatch. Be sure it matches function_dimension argument."
+        assert np.all(search_upper_bound > search_lower_bound), \
+            "search_upper_bound must be greater than search_lower_bound for all dimensions."
 
         # Initialize CMA-ES optimizer
         if self._initial_mean is None:
@@ -57,8 +66,8 @@ class CMAES(Algorithm):
         cma = CMA(
             mean=self._initial_mean,
             sigma=self._initial_sigma,
-            bounds=np.array([search_lower_bound, search_upper_bound]).reshape(1, -1).repeat(function_dimension, axis=0),
-            max_population_size=max_population_size
+            bounds=np.array([search_lower_bound, search_upper_bound]).T,
+            population_size=max_population_size
         )
         self._n_func_calls = 0
         population = None

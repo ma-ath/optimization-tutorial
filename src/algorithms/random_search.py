@@ -43,7 +43,16 @@ class RandomSearch(Algorithm):
         self._n_func_calls = 0
 
         search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
-        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
+        if type(search_lower_bound) is float:
+            search_lower_bound = np.full((function_dimension,), search_lower_bound)
+        if type(search_upper_bound) is float:
+            search_upper_bound = np.full((function_dimension,), search_upper_bound)
+        assert len(search_lower_bound) == function_dimension, \
+            "search_lower_bound length mismatch. Be sure it matches function_dimension argument."
+        assert len(search_upper_bound) == function_dimension, \
+            "search_upper_bound length mismatch. Be sure it matches function_dimension argument."
+        assert np.all(search_upper_bound > search_lower_bound), \
+            "search_upper_bound must be greater than search_lower_bound for all dimensions."
 
         if budget is None and stop_fitness is None:
             self._logger.error("Either budget or stop_fitness must be provided!")
@@ -135,7 +144,7 @@ if __name__ == "__main__":
         stop_fitness=None,
         minimize=True,
         verbose=True,
-        search_domain=(-1, 1)
+        search_domain=(-1.0, 1.0)
     )
 
     print("Best solution found:", result["x_opt"])

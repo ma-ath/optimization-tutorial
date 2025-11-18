@@ -26,9 +26,10 @@ class GradientDescent(Algorithm):
                  budget: Optional[int] = None,
                  stop_fitness: Optional[float] = None,
                  minimize: bool = True,
+                 function_dimension: int,
                  verbose: bool = False) -> Result:
         """Optimize a given function using Gradient Descent within a specified budget.
-        
+
         Args:
             function (Function): The objective function to optimize.
             initial_population (np.ndarray): The starting point for the optimization.
@@ -43,7 +44,16 @@ class GradientDescent(Algorithm):
         self._n_func_calls = 0
 
         search_lower_bound, search_upper_bound = function.function_domain if search_domain is None else search_domain
-        assert search_lower_bound < search_upper_bound, "Invalid search domain bounds."
+        if type(search_lower_bound) is float:
+            search_lower_bound = np.full((function_dimension,), search_lower_bound)
+        if type(search_upper_bound) is float:
+            search_upper_bound = np.full((function_dimension,), search_upper_bound)
+        assert len(search_lower_bound) == function_dimension, \
+            "search_lower_bound length mismatch. Be sure it matches function_dimension argument."
+        assert len(search_upper_bound) == function_dimension, \
+            "search_upper_bound length mismatch. Be sure it matches function_dimension argument."
+        assert np.all(search_upper_bound > search_lower_bound), \
+            "search_upper_bound must be greater than search_lower_bound for all dimensions."
 
         if max_population_size is not None:
             assert initial_population.shape[0] <= max_population_size, \
@@ -52,6 +62,9 @@ class GradientDescent(Algorithm):
         if budget is None and stop_fitness is None:
             self._logger.error("Either budget or stop_fitness must be provided!")
             raise AssertionError("Either budget or stop_fitness must be provided!")
+
+        assert initial_population.shape[initial_population.ndim - 1] == function_dimension, \
+            "Initial population dimension mismatch. Be sure it matches function_dimension argument."
 
         assert function.is_differentiable, "Function must be differentiable for Gradient Descent."
 
@@ -87,7 +100,7 @@ class GradientDescent(Algorithm):
                 break
 
             if stop_fitness is not None:
-                if (minimize and fitness <= stop_fitness) or (not minimize and fitness >= stop_fitness):
+                if (minimize and (fitness <= stop_fitness).any()) or (not minimize and (fitness >= stop_fitness).any()):
                     break
 
         pbar.close()
@@ -113,7 +126,8 @@ if __name__ == "__main__":
         initial_population=np.array([10.0, 10.0, 10.0]),
         budget=100,
         stop_fitness=1e-6,
-        minimize=True
+        minimize=True,
+        function_dimension=3,
     )
 
     print("Optimized x:", result["x_opt"])
