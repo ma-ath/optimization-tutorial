@@ -16,14 +16,10 @@ class GaussianEvolutionStrategy(Algorithm):
 
     @property
     def name(self) -> str:
-        return "Evolution Strategy with Gaussian Sampling"
+        return "Evolution Strategy with Gaussian Sampling (GES)"
 
-    def __init__(self, *,
-                 mean0: np.ndarray = 0.0,
-                 sigma0: np.ndarray = 1.0):
+    def __init__(self) -> None:
         super().__init__()
-        self._mean0: np.ndarray = mean0
-        self._sigma0: np.ndarray = sigma0
         self._n_func_calls: int = 0
 
     def optimize(self,
@@ -69,7 +65,6 @@ class GaussianEvolutionStrategy(Algorithm):
 
         # Initialize population variable
         population = None
-        mu, sigma = self._mean0, self._sigma0
 
         # Variables to keep track of the distribution parameters
         best_fitness_history = []
@@ -88,6 +83,9 @@ class GaussianEvolutionStrategy(Algorithm):
                     population = initial_population
                 # Ensure population is within bounds
                 population = np.clip(population, search_lower_bound, search_upper_bound)
+                # Initialize distribution parameters
+                mu = np.mean(population, axis=0)
+                sigma = np.std(population, axis=0)
             else:
                 # Subsequent runs: Sample around the mean and std of the elite set
                 population = np.random.randn(max_population_size, function_dimension) * sigma + mu
