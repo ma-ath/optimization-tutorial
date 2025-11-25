@@ -7,3 +7,5 @@ matplotlib==3.10.7
 plotly==6.4.0
 nbformat==5.10.4
 cmaes==0.12.0
+coco-experiment==2.8.1
+cocopp==2.8.0

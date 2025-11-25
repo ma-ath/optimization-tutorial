@@ -14,7 +14,7 @@ if __name__ == "__main__":
         from cocoex.utilities import MiniPrint
 
         from src.algorithms._algorithm import Algorithm
-        from src.algorithms import DifferentialEvolution, GaussianEvolutionStrategy
+        from src.algorithms import DifferentialEvolution, GaussianEvolutionStrategy, CMAES, RandomSearch
         from src.utils import setup_logger, CocoProblemWrapper
 
 
@@ -23,8 +23,16 @@ if __name__ == "__main__":
 
         algorithms: dict[Algorithm, dict[str, Any]] = {
             DifferentialEvolution(): {
+                "max_population_size": 50,
             },
             GaussianEvolutionStrategy(): {
+                "max_population_size": 50,
+            },
+            RandomSearch(): {
+                "max_population_size": 300,
+            },
+            CMAES(): {
+                "max_population_size": 10,
             },
         }
 
@@ -48,7 +56,6 @@ if __name__ == "__main__":
 
                     logger.info(f'Starting optimization on problem {problem.id} with dimension {problem.dimension}')
                     result = algorithm.optimize(coco_problem,
-                                                max_population_size = 50,
                                                 budget = 10000 * problem.dimension,
                                                 stop_fitness = 1e-6,
                                                 function_dimension = problem.dimension,
